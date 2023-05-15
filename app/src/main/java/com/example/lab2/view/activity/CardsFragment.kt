@@ -36,45 +36,25 @@ class CardsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         bind = FragmentCardsBinding.inflate(inflater, container, false)
+        cardAdapter = CardAdapter()
+        cardViewModel = ViewModelProvider(this).get(CardViewModel::class.java)
 
         onLoadCardLiveData()
-        bind.container.layoutManager = LinearLayoutManager(context,
-            LinearLayoutManager.VERTICAL,false)
-        bind.container.adapter = cardAdapter
+
         return bind.root
     }
 
     fun onLoadCardLiveData() {
-
-        cardAdapter = CardAdapter()
-        cardViewModel = ViewModelProvider(this).get(CardViewModel::class.java)
 
         cardViewModel.getCardLiveData().observe(viewLifecycleOwner, Observer {
                 cards->
             cardAdapter.submitList(cards)
 
         })
+        cardViewModel.setCard()
 
-        val apiService = RetrofitClient.getRetrofit().create(ApiInterface::class.java)
-
-        val call = apiService.getMovieList()
-
-        call.enqueue(object : Callback<List<CardRequest>>{
-            override fun onResponse(call: Call<List<CardRequest>>, response: Response<List<CardRequest>>) {
-                val cards = response.body()
-                if(cards != null){
-                    cardViewModel.setCard(cards)
-                }
-            }
-
-            override fun onFailure(call: Call<List<CardRequest>>, t: Throwable) {
-
-            }
-        })
-
-
-
-
-
+        bind.container.layoutManager = LinearLayoutManager(context,
+            LinearLayoutManager.VERTICAL,false)
+        bind.container.adapter = cardAdapter
     }
 }
